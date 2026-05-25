@@ -1,0 +1,20 @@
+{
+  "name": "teste_avaliei",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "codegen": "npx playwright codegen https://app.avaliei.com.br/login"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "speakeasy": "^2.0.0"
+  }
+}
