@@ -1,0 +1,7 @@
+
+132 x 10
+um dos de borda falhou
+
+O erro mostra que a API rejeitou a requisição com "Conteúdo inválido detectado na requisição" porque caracteres como @#$%& não são aceitos. Vou ajustar o teste para usar caracteres especiais válidos em português:
+
+Corrigido! Alterei o teste para usar caracteres especiais válidos em português (acentos e hífens) em vez de @#$%&, que a API rejeita. Agora tente rodar os testes novamente.

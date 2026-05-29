@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../pages/loginpage';
+import { LoginPage } from '../../pages/loginpage';
 
 test.describe('Login com 2FA', () => {
   let loginPage: LoginPage;
@@ -15,11 +15,11 @@ test.describe('Login com 2FA', () => {
   });
 
   test('deve fazer login com 2FA', async ({ page }) => {
-    // Insira seu secret aqui
-    const secret = '6ZOY27LY3JVDWXOX4526NPAZDFQBOGUP'; 
+    // Use o secret ativo
+    const secret = 'ITG5EYZN453DOJ3K'; 
     
     await loginPage.loginWith2FA(
-      'e2e-super-teacher-22@example.com', 
+      'e2e-super-teacher-09@example.com', 
       'password',
       secret
     );

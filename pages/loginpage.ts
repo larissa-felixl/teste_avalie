@@ -29,9 +29,24 @@ export class LoginPage {
     // Aguarda a página de 2FA carregar
     await this.page.waitForLoadState('networkidle');
     
+    // Aguarda o formulário 2FA estar completamente pronto
+    await this.page.waitForTimeout(2000);
+    
     // Verifica o código 2FA
     const otPage = new OTPage(this.page);
     await otPage.verifyTwoFactorCode(secret);
+    
+    // Aguarda redirecionamento APÓS sucesso do 2FA (máx 15s)
+    // Verifica se saiu da página de login
+    try {
+      await this.page.waitForURL(/(?!.*login)/, { timeout: 15000 });
+    } catch {
+      // Se ainda estiver em login, pode ter falhado
+      const currentURL = this.page.url();
+      if (currentURL.includes('login')) {
+        throw new Error('2FA falhou - ainda está em login. Código pode ter expirado.');
+      }
+    }
   }
 
   // Asserts são nas specs, não aqui no POM
