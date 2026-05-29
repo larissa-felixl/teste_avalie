@@ -32,7 +32,8 @@ export class DisciplinasPage {
     await this.addDisciplinaButton.click();
     await this.disciplinaNameInput.fill(disciplinaName);
     await this.areaSelectButton.click();
-    await this.page.getByText(areaName).click();
+    // Clica especificamente no item do dropdown de sugestões
+    await this.page.getByLabel('Suggestions').getByText(areaName).click();
     await this.saveButton.click();
   }
 
@@ -54,7 +55,8 @@ export class DisciplinasPage {
     
     if (newArea) {
       await this.areaSelectButton.click();
-      await this.page.getByText(newArea).click();
+      // Clica especificamente no item do dropdown de sugestões
+      await this.page.getByLabel('Suggestions').getByText(newArea).click();
     }
     
     await this.saveButton.click();
