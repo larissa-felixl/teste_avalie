@@ -45,7 +45,7 @@ test.describe('Conteúdos - CRUD', () => {
     
     // Edita
     await conteudosPage.searchConteudo(conteudoName);
-    await conteudosPage.editConteudo(novoNome, novaDisciplina);
+    await conteudosPage.editConteudo(conteudoName, novoNome, novaDisciplina);
     
     // Verifica
     await conteudosPage.searchConteudo(novoNome);
@@ -91,7 +91,7 @@ test.describe('Conteúdos - CRUD', () => {
   });
 
   test('[BORDA] Deve criar conteúdo com nome de um caractere', async ({ page }) => {
-    const conteudoSimples = `x`;
+    const conteudoSimples = `x-${Date.now()}`;
     const disciplinaName = 'Geografia';
     
     await conteudosPage.addConteudo(conteudoSimples, disciplinaName);

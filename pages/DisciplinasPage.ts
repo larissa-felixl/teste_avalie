@@ -41,8 +41,15 @@ export class DisciplinasPage {
     await this.searchInput.fill(disciplinaName);
   }
 
-  async editDisciplina(newName: string, newArea?: string) {
-    await this.editButton.click();
+  async editDisciplina(disciplinaName: string, newName: string, newArea?: string) {
+    // Encontra a linha específica da disciplina
+    const disciplinaRow = this.page.locator('tbody tr').filter({ hasText: disciplinaName });
+    
+    // Clica no botão Editar dessa linha específica
+    await disciplinaRow.locator('button:has-text("Editar")').first().click();
+    
+    await this.disciplinaNameInput.waitFor({ state: 'visible', timeout: 10000 });
+    await this.disciplinaNameInput.clear();
     await this.disciplinaNameInput.fill(newName);
     
     if (newArea) {
@@ -53,8 +60,14 @@ export class DisciplinasPage {
     await this.saveButton.click();
   }
 
-  async deleteDisciplina() {
-    await this.deleteButton.click();
+  async deleteDisciplina(disciplinaName: string) {
+    // Encontra a linha específica da disciplina
+    const disciplinaRow = this.page.locator('tbody tr').filter({ hasText: disciplinaName });
+    
+    // Clica no botão Excluir dessa linha específica
+    await disciplinaRow.locator('button:has-text("x")').first().click();
+    
+    // Confirma a exclusão
     const confirmDelete = this.page.getByRole('button', { name: 'Excluir' }).last();
     await confirmDelete.click();
   }

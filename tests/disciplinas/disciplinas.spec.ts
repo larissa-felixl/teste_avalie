@@ -44,7 +44,7 @@ test.describe('Disciplinas - CRUD', () => {
     
     // Edita
     await disciplinasPage.searchDisciplina(disciplinaName);
-    await disciplinasPage.editDisciplina(novoNome);
+    await disciplinasPage.editDisciplina(disciplinaName, novoNome);
     
     // Verifica
     await disciplinasPage.searchDisciplina(novoNome);

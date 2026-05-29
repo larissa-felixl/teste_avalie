@@ -41,16 +41,29 @@ export class ConteudosPage {
     await this.searchInput.fill(conteudoName);
   }
 
-  async editConteudo(newName: string, newDisciplina: string) {
-    await this.editButton.click();
+  async editConteudo(conteudoName: string, newName: string, newDisciplina: string) {
+    // Encontra a linha específica do conteúdo
+    const conteudoRow = this.page.locator('tbody tr').filter({ hasText: conteudoName });
+    
+    // Clica no botão Editar dessa linha específica
+    await conteudoRow.locator('button:has-text("Editar")').first().click();
+    
+    await this.conteudoNameInput.waitFor({ state: 'visible', timeout: 10000 });
+    await this.conteudoNameInput.clear();
     await this.conteudoNameInput.fill(newName);
     await this.disciplinaSelectButton.click();
     await this.page.getByRole('option', { name: newDisciplina }).click();
     await this.saveButton.click();
   }
 
-  async deleteConteudo() {
-    await this.deleteButton.click();
+  async deleteConteudo(conteudoName: string) {
+    // Encontra a linha específica do conteúdo
+    const conteudoRow = this.page.locator('tbody tr').filter({ hasText: conteudoName });
+    
+    // Clica no botão Excluir dessa linha específica
+    await conteudoRow.locator('button:has-text("x")').first().click();
+    
+    // Confirma a exclusão
     const confirmDelete = this.page.getByRole('button', { name: 'Excluir' }).last();
     await confirmDelete.click();
   }
