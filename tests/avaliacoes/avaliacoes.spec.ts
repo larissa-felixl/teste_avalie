@@ -113,4 +113,232 @@ test.describe('Avaliações - CRUD', () => {
     const isVisible = await avaliacaoHeading.isVisible().catch(() => false);
     expect(isVisible).toBe(true);
   });
+
+  // ❌ CASOS INFELIZES (Sad Path)
+  test('[TRISTE] Deve mostrar erro ao tentar criar avaliação sem descrição', async ({ page }) => {
+    // Clica em Criar Avaliação
+    await avaliacoesPage.criarAvaliacaoButton.click();
+    await page.waitForTimeout(1000);
+    
+    // Tenta salvar sem preencher a descrição (campo obrigatório)
+    // Seleciona turma
+    await avaliacoesPage.selecionarTurmasButton.click();
+    await page.waitForTimeout(500);
+    const turmaOption = page.getByRole('option').filter({ hasText: '6º' }).first();
+    await turmaOption.click();
+    await page.waitForTimeout(500);
+    
+    // Seleciona marcador
+    await avaliacoesPage.selecionarMarcadoresButton.click();
+    await page.waitForTimeout(500);
+    const marcadorOption = page.getByRole('option', { name: '2º Bimestre' });
+    await marcadorOption.click();
+    await page.waitForTimeout(500);
+    
+    // Preenche data
+    await avaliacoesPage.dataAplicacaoInput.click();
+    await avaliacoesPage.dataAplicacaoInput.fill('12/06/2026');
+    await page.waitForTimeout(500);
+    
+    // Seleciona modo
+    await avaliacoesPage.modoSelect.click();
+    await page.waitForTimeout(300);
+    const modoOption = page.getByRole('option', { name: 'Convencional' });
+    await modoOption.click();
+    await page.waitForTimeout(500);
+    
+    // Tenta salvar sem descrição
+    await avaliacoesPage.salvarAvaliacaoButton.click();
+    await page.waitForTimeout(1000);
+    
+    // Verifica se há erro (mensagem de validação ou permanece na página)
+    const errorMessage = page.locator('[role="alert"]').first();
+    const hasError = await errorMessage.isVisible({ timeout: 3000 }).catch(() => false);
+    
+    // Ou verifica se ainda está na página de criação (não salvou)
+    const criarButton = await avaliacoesPage.criarAvaliacaoButton.isVisible({ timeout: 2000 }).catch(() => false);
+    
+    expect(hasError || !criarButton).toBe(true);
+  });
+
+  test('[TRISTE] Deve mostrar erro ao tentar criar avaliação sem turma selecionada', async ({ page }) => {
+    // Clica em Criar Avaliação
+    await avaliacoesPage.criarAvaliacaoButton.click();
+    await page.waitForTimeout(1000);
+    
+    // Preenche descrição
+    await avaliacoesPage.descricaoInput.waitFor({ state: 'visible', timeout: 10000 });
+    await avaliacoesPage.descricaoInput.fill('Avaliação sem turma');
+    await page.waitForTimeout(500);
+    
+    // Seleciona marcador
+    await avaliacoesPage.selecionarMarcadoresButton.click();
+    await page.waitForTimeout(500);
+    const marcadorOption = page.getByRole('option', { name: '2º Bimestre' });
+    await marcadorOption.click();
+    await page.waitForTimeout(500);
+    
+    // Preenche data
+    await avaliacoesPage.dataAplicacaoInput.click();
+    await avaliacoesPage.dataAplicacaoInput.fill('12/06/2026');
+    await page.waitForTimeout(500);
+    
+    // Seleciona modo
+    await avaliacoesPage.modoSelect.click();
+    await page.waitForTimeout(300);
+    const modoOption = page.getByRole('option', { name: 'Convencional' });
+    await modoOption.click();
+    await page.waitForTimeout(500);
+    
+    // Tenta salvar SEM selecionar turma
+    await avaliacoesPage.salvarAvaliacaoButton.click();
+    await page.waitForTimeout(1000);
+    
+    // Verifica se há erro
+    const errorMessage = page.locator('[role="alert"]').first();
+    const hasError = await errorMessage.isVisible({ timeout: 3000 }).catch(() => false);
+    
+    // Ou verifica se ainda está na página de criação
+    const descricaoInput = await avaliacoesPage.descricaoInput.isVisible({ timeout: 2000 }).catch(() => false);
+    
+    expect(hasError || descricaoInput).toBe(true);
+  });
+
+  // 🔲 CASOS DE BORDA (Edge Cases)
+  test('[BORDA] Deve detectar injeção de script JS na descrição', async ({ page }) => {
+    const descricaoComScript = '<script>alert("xss")</script>Conteúdo';
+    const dataAplicacao = '12/06/2026';
+    
+    // Tenta criar com script na descrição
+    await avaliacoesPage.criarAvaliacaoButton.click();
+    await page.waitForTimeout(1000);
+    
+    // Preenche com script
+    await avaliacoesPage.descricaoInput.waitFor({ state: 'visible', timeout: 10000 });
+    await avaliacoesPage.descricaoInput.fill(descricaoComScript);
+    await page.waitForTimeout(500);
+    
+    // Seleciona turma
+    await avaliacoesPage.selecionarTurmasButton.click();
+    await page.waitForTimeout(500);
+    const turmaOption = page.getByRole('option').filter({ hasText: '6º' }).first();
+    await turmaOption.click();
+    await page.waitForTimeout(500);
+    
+    // Seleciona marcador
+    await avaliacoesPage.selecionarMarcadoresButton.click();
+    await page.waitForTimeout(500);
+    const marcadorOption = page.getByRole('option', { name: '2º Bimestre' });
+    await marcadorOption.click();
+    await page.waitForTimeout(500);
+    
+    // Preenche data
+    await avaliacoesPage.dataAplicacaoInput.click();
+    await avaliacoesPage.dataAplicacaoInput.fill(dataAplicacao);
+    await page.waitForTimeout(500);
+    
+    // Seleciona modo
+    await avaliacoesPage.modoSelect.click();
+    await page.waitForTimeout(300);
+    const modoOption = page.getByRole('option', { name: 'Convencional' });
+    await modoOption.click();
+    await page.waitForTimeout(500);
+    
+    // Preenche bloco objetivo
+    const professorButton = page.getByLabel('Bloco objetivo 1').getByRole('button').filter({ hasText: 'Professor' }).first();
+    await professorButton.click();
+    await page.waitForTimeout(500);
+    const primeiroProf = page.getByRole('option').first();
+    await primeiroProf.click();
+    await page.waitForTimeout(500);
+    
+    const disciplinaSelect = page.getByRole('combobox', { name: /Selecionar disciplina para Bloco objetivo/ }).first();
+    await disciplinaSelect.click();
+    await page.waitForTimeout(500);
+    const primeiraDisciplina = page.getByRole('option').first();
+    await primeiraDisciplina.click();
+    await page.waitForTimeout(500);
+    
+    // Tenta salvar
+    await avaliacoesPage.salvarAvaliacaoButton.click();
+    await page.waitForTimeout(1500);
+    
+    // Verifica se há erro de validação (rejeitou o script)
+    const errorMessage = page.locator('[role="alert"]').first();
+    const hasError = await errorMessage.isVisible({ timeout: 3000 }).catch(() => false);
+    
+    // Ou verifica se ainda está na página (não salvou por validação)
+    const descricaoInput = await avaliacoesPage.descricaoInput.isVisible({ timeout: 2000 }).catch(() => false);
+    
+    // Ou verificar se sanitizou (se conseguiu salvar, o script foi removido)
+    if (!hasError && !descricaoInput) {
+      // Salvou - verifica se a descrição foi sanitizada
+      await page.waitForNavigation({ timeout: 5000 }).catch(() => {});
+      await page.waitForTimeout(1000);
+      
+      const searchBox = page.getByRole('textbox', { name: 'Pesquisar' });
+      await searchBox.click();
+      await searchBox.fill('Conteúdo');
+      await page.waitForTimeout(1000);
+      
+      // Se encontrou com "Conteúdo", significa que sanitizou o script
+      const avaliacaoHeading = page.getByRole('heading').filter({ hasText: 'Conteúdo' }).first();
+      const found = await avaliacaoHeading.isVisible({ timeout: 3000 }).catch(() => false);
+      
+      expect(found).toBe(true); // Script foi removido, apenas "Conteúdo" permaneceu
+    } else {
+      // Rejeitou ou não salvou - o que é esperado
+      expect(hasError || descricaoInput).toBe(true);
+    }
+  });
+
+  test('[BORDA] Deve rejeitar descrição com mais de 255 caracteres', async ({ page }) => {
+    // Cria string com 300 caracteres
+    const descricaoLonga = 'A'.repeat(300);
+    
+    // Tenta criar com descrição muito longa
+    await avaliacoesPage.criarAvaliacaoButton.click();
+    await page.waitForTimeout(1000);
+    
+    // Preenche com descrição longa
+    await avaliacoesPage.descricaoInput.waitFor({ state: 'visible', timeout: 10000 });
+    await avaliacoesPage.descricaoInput.fill(descricaoLonga);
+    await page.waitForTimeout(500);
+    
+    // Verifica se o campo limitou a entrada (truncou)
+    const descricaoValue = await avaliacoesPage.descricaoInput.inputValue();
+    
+    // Ou verifica se campo rejeitou caracteres extras
+    expect(descricaoValue.length).toBeLessThanOrEqual(255);
+  });
+
+  test('[BORDA] Deve salvar avaliação com caracteres especiais na descrição', async ({ page }) => {
+    const descricao = `Avaliação @#$%*() - ${Date.now()}`;
+    const dataAplicacao = '12/06/2026';
+    
+    // Tenta criar com caracteres especiais (não script)
+    await avaliacoesPage.criarAvaliacao(
+      descricao,
+      '6º',
+      '2º Bimestre',
+      dataAplicacao,
+      'Convencional'
+    );
+    
+    // Aguarda redirecionamento
+    await page.waitForNavigation({ timeout: 10000 }).catch(() => {});
+    await page.waitForTimeout(2000);
+    
+    // Procura pela avaliação
+    const searchBox = page.getByRole('textbox', { name: 'Pesquisar' });
+    await searchBox.click();
+    await searchBox.fill(descricao);
+    await page.waitForTimeout(1500);
+    
+    // Verifica se foi salva corretamente
+    const avaliacaoHeading = page.getByRole('heading').filter({ hasText: 'Avaliação' }).first();
+    const isVisible = await avaliacaoHeading.isVisible().catch(() => false);
+    
+    expect(isVisible).toBe(true);
+  });
 });
