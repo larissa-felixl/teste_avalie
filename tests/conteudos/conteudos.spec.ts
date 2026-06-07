@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pages/loginpage';
+import { LoginPage } from '../../pages/LoginPage';
 import { ConteudosPage } from '../../pages/ConteudosPage';
 
 const SECRET = 'ITG5EYZN453DOJ3K';
