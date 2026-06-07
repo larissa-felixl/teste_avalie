@@ -75,6 +75,6 @@ export class DisciplinasPage {
   }
 
   async clearDisciplinaNameInput() {
-    await this.disciplinaNameInput.fill('');
+    await this.disciplinaNameInput.clear();
   }
 }

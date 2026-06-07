@@ -28,16 +28,10 @@ export class CursosPage {
   }
 
   async navigateToCursos() {
-    // Clica em "Turmas" para abrir o menu
     await this.turmasButton.click();
     await this.page.waitForTimeout(500);
-    
-    // Clica no link "Cursos" dentro do menu
     await this.cursosLink.click();
-    await this.page.waitForNavigation({ timeout: 10000 }).catch(() => {});
-    
-    // Aguarda a página carregar
-    await this.addCursoButton.waitFor({ state: 'visible', timeout: 20000 });
+    await this.page.waitForLoadState('networkidle');
   }
 
   async addCurso(nomeCurso: string, escolaridade?: string) {

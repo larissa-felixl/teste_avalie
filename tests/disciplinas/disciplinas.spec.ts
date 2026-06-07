@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../../pages/LoginPage';
 import { DisciplinasPage } from '../../pages/DisciplinasPage';
+import { AuthHelper } from '../../fixtures/authHelper';
 
 const SECRET = 'ITG5EYZN453DOJ3K';
 const EMAIL = 'e2e-super-teacher-09@example.com';
@@ -13,7 +14,7 @@ test.describe('Disciplinas - CRUD', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('https://app.avaliei.com.br/login');
     loginPage = new LoginPage(page);
-    await loginPage.loginWith2FA(EMAIL, PASSWORD, SECRET);
+    await AuthHelper.loginWith2FA(page, EMAIL, PASSWORD, SECRET);
     
     // Aguarda a página carregar completamente após 2FA
     await page.waitForLoadState('networkidle');

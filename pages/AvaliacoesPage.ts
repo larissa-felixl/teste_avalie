@@ -28,11 +28,8 @@ export class AvaliacoesPage {
   }
 
   async navigateToAvaliacoes() {
-    const navigationPromise = this.page.waitForNavigation({ timeout: 5000 }).catch(() => {});
     await this.avaliacoesLink.click();
-    await navigationPromise;
-    
-    await this.criarAvaliacaoButton.waitFor({ state: 'visible', timeout: 20000 });
+    await this.page.waitForLoadState('networkidle');
   }
 
   async criarAvaliacao(descricao: string, turma: string, marcador: string, dataAplicacao: string, modo: string) {

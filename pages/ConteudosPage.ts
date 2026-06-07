@@ -69,6 +69,6 @@ export class ConteudosPage {
   }
 
   async clearConteudoNameInput() {
-    await this.conteudoNameInput.fill('');
+    await this.conteudoNameInput.clear();
   }
 }

@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../../pages/LoginPage';
+import { AuthHelper } from '../../fixtures/authHelper';
 
 test.describe('Login com 2FA', () => {
   let loginPage: LoginPage;
@@ -18,7 +19,8 @@ test.describe('Login com 2FA', () => {
     // Use o secret ativo
     const secret = 'ITG5EYZN453DOJ3K'; 
     
-    await loginPage.loginWith2FA(
+    await AuthHelper.loginWith2FA(
+      page,
       'e2e-super-teacher-09@example.com', 
       'password',
       secret
@@ -26,4 +28,4 @@ test.describe('Login com 2FA', () => {
     
     // await expect(page).toHaveURL(/.*dashboard/);
   });
-});
+

@@ -22,13 +22,8 @@ export class AreasPage {
   }
 
   async navigateToAreas() {
-    // Usa waitForNavigation para evitar conflitos com redirecionamentos automáticos
-    const navigationPromise = this.page.waitForNavigation({ timeout: 5000 }).catch(() => {});
-    await this.page.goto('https://app.avaliei.com.br/areas', { waitUntil: 'domcontentloaded' });
-    await navigationPromise;
-    
-    // Aguarda o botão aparecer (máx 20s)
-    await this.addAreaButton.waitFor({ state: 'visible', timeout: 20000 });
+    await this.page.goto('https://app.avaliei.com.br/areas');
+    await this.page.waitForLoadState('networkidle');
   }
 
   async addArea(areaName: string) {
@@ -74,7 +69,7 @@ export class AreasPage {
   }
 
   async clearAreaNameInput() {
-    await this.areaNameInput.fill('');
+    await this.areaNameInput.clear();
   }
   
   async getAreaByName(areaName: string): Promise<Locator> {
