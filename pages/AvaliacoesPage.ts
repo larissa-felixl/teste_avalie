@@ -1,4 +1,4 @@
-import { Page, Locator } from '@playwright/test';
+﻿import { Page, Locator } from '@playwright/test';
 
 export class AvaliacoesPage {
   readonly page: Page;
@@ -11,11 +11,14 @@ export class AvaliacoesPage {
   readonly modoSelect: Locator;
   readonly salvarAvaliacaoButton: Locator;
   readonly salvarAlteracoesButton: Locator;
-  readonly closeButton: Locator;
+  readonly searchInput: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    this.avaliacoesLink = page.getByRole('link', { name: 'Avaliações' });
+    // ✅ Escopo no nav principal para evitar ambiguidade
+    this.avaliacoesLink = page
+      .getByRole('navigation', { name: 'Main' })
+      .getByRole('link', { name: 'Avaliações' });
     this.criarAvaliacaoButton = page.getByRole('button', { name: 'Criar Avaliação' });
     this.descricaoInput = page.getByRole('textbox', { name: 'Descrição da avaliação: *' });
     this.selecionarTurmasButton = page.getByText('Selecionar turmas');
@@ -24,108 +27,116 @@ export class AvaliacoesPage {
     this.modoSelect = page.getByRole('combobox', { name: 'Modo: campo obrigatório' });
     this.salvarAvaliacaoButton = page.getByRole('button', { name: 'Salvar avaliação' });
     this.salvarAlteracoesButton = page.getByRole('button', { name: 'Salvar Alterações' });
-    this.closeButton = page.getByRole('button', { name: 'Close' });
+    // ✅ searchInput adicionado ao construtor
+    this.searchInput = page.getByPlaceholder('Pesquisar avaliações...');
   }
 
   async navigateToAvaliacoes() {
-    await this.avaliacoesLink.click();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.goto('https://app.avaliei.com.br/avaliacoes');
+    await this.page.waitForURL('**/avaliacoes');
+    // ✅ Aguarda o botão principal em vez de networkidle
+    await this.criarAvaliacaoButton.waitFor({ state: 'visible', timeout: 30000 });
   }
 
-  async criarAvaliacao(descricao: string, turma: string, marcador: string, dataAplicacao: string, modo: string) {
-    // Clica em Criar Avaliação
+  // ✅ PASSOS REUTILIZÁVEIS — cada ação isolada
+  async abrirFormulario() {
     await this.criarAvaliacaoButton.click();
-    await this.page.waitForTimeout(1000);
-    
-    // Preenche descrição
     await this.descricaoInput.waitFor({ state: 'visible', timeout: 10000 });
+  }
+
+  async preencherDescricao(descricao: string) {
     await this.descricaoInput.fill(descricao);
-    await this.page.waitForTimeout(500);
-    
-    // Seleciona turma
+  }
+
+  async selecionarTurma(turma: string) {
     await this.selecionarTurmasButton.click();
-    await this.page.waitForTimeout(500);
-    const turmaOption = this.page.getByRole('option').filter({ hasText: turma }).first();
+    const turmaOption = this.page.getByRole('option', { name: turma });
+    await turmaOption.waitFor({ state: 'visible', timeout: 5000 });
     await turmaOption.click();
-    await this.page.waitForTimeout(500);
-    
-    // Seleciona marcador
+  }
+
+  async selecionarMarcador(marcador: string) {
     await this.selecionarMarcadoresButton.click();
-    await this.page.waitForTimeout(500);
     const marcadorOption = this.page.getByRole('option', { name: marcador });
+    await marcadorOption.waitFor({ state: 'visible', timeout: 5000 });
     await marcadorOption.click();
-    await this.page.waitForTimeout(500);
-    
-    // Preenche data
+  }
+
+  async preencherDataAplicacao(dataAplicacao: string) {
     await this.dataAplicacaoInput.click();
     await this.dataAplicacaoInput.fill(dataAplicacao);
-    await this.page.waitForTimeout(500);
-    
-    // Seleciona modo
-    await this.modoSelect.click();
-    await this.page.waitForTimeout(300);
-    const modoOption = this.page.getByRole('option', { name: modo });
-    await modoOption.click();
-    await this.page.waitForTimeout(500);
-    
-    // Preenche bloco objetivo 1 - Professor
-    const professorButton = this.page.getByLabel('Bloco objetivo 1').getByRole('button').filter({ hasText: 'Professor' }).first();
-    await professorButton.click();
-    await this.page.waitForTimeout(500);
-    
-    // Seleciona primeiro professor disponível
-    const primeiroProf = this.page.getByRole('option').first();
-    await primeiroProf.click();
-    await this.page.waitForTimeout(500);
-    
-    // Preenche bloco objetivo 1 - Disciplina
-    const disciplinaSelect = this.page.getByRole('combobox', { name: /Selecionar disciplina para Bloco objetivo/ }).first();
-    await disciplinaSelect.click();
-    await this.page.waitForTimeout(500);
-    
-    // Seleciona primeira disciplina disponível
-    const primeiraDisciplina = this.page.getByRole('option').first();
-    await primeiraDisciplina.click();
-    await this.page.waitForTimeout(500);
-    
-    // Salva
-    await this.salvarAvaliacaoButton.click();
-    await this.page.waitForTimeout(2000);
   }
 
-  async editarAvaliacao(descricao: string, novaDataAplicacao: string) {
-    // Aguarda a página carregar
-    await this.page.waitForTimeout(1000);
-    
-    // Procura pela avaliação e clica em "Mais Ações"
-    const avaliacaoHeading = this.page.getByRole('heading').filter({ hasText: descricao }).first();
-    await avaliacaoHeading.waitFor({ state: 'visible', timeout: 10000 });
-    
-    // Procura pelo botão "Mais Ações" mais próximo
-    const maisAcoesButton = await this.page.locator('button').filter({ hasText: 'Mais Ações' }).first();
-    await maisAcoesButton.click();
-    await this.page.waitForTimeout(500);
-    
-    // Clica em Editar
-    const editarOption = this.page.getByRole('menuitem', { name: 'Editar' });
-    await editarOption.click();
-    await this.page.waitForTimeout(1000);
-    
-    // Edita a data de aplicação
-    await this.dataAplicacaoInput.click();
-    await this.dataAplicacaoInput.press('Control+A');
-    await this.dataAplicacaoInput.fill(novaDataAplicacao);
-    await this.page.waitForTimeout(500);
-    
-    // Salva alterações
-    await this.salvarAlteracoesButton.click();
-    await this.page.waitForTimeout(2000);
+  async selecionarModo(modo: string) {
+    await this.modoSelect.click();
+    const modoOption = this.page.getByRole('option', { name: modo });
+    await modoOption.waitFor({ state: 'visible', timeout: 5000 });
+    await modoOption.click();
+  }
+
+  async selecionarProfessor() {
+    const professorButton = this.page
+      .getByLabel('Bloco objetivo 1')
+      .getByRole('button', { name: 'Professor' });
+    await professorButton.waitFor({ state: 'visible', timeout: 5000 });
+    await professorButton.click();
+
+    const primeiroProf = this.page.getByRole('option').first();
+    await primeiroProf.waitFor({ state: 'visible', timeout: 5000 });
+    await primeiroProf.click();
+  }
+
+  async selecionarDisciplina() {
+    const disciplinaSelect = this.page.getByRole('combobox', {
+      name: /Selecionar disciplina para Bloco objetivo/,
+    });
+    await disciplinaSelect.waitFor({ state: 'visible', timeout: 5000 });
+    await disciplinaSelect.click();
+
+    const primeiraDisciplina = this.page.getByRole('option').first();
+    await primeiraDisciplina.waitFor({ state: 'visible', timeout: 5000 });
+    await primeiraDisciplina.click();
+  }
+
+  async salvar() {
+    await this.salvarAvaliacaoButton.click();
+    // ✅ Aguarda o formulário fechar como confirmação de sucesso
+    await this.descricaoInput.waitFor({ state: 'hidden', timeout: 15000 });
+  }
+
+  // ✅ MÉTODO COMPOSTO — usa os passos reutilizáveis
+  async criarAvaliacao(
+    descricao: string,
+    turma: string,
+    marcador: string,
+    dataAplicacao: string,
+    modo: string
+  ) {
+    await this.abrirFormulario();
+    await this.preencherDescricao(descricao);
+    await this.selecionarTurma(turma);
+    await this.selecionarMarcador(marcador);
+    await this.preencherDataAplicacao(dataAplicacao);
+    await this.selecionarModo(modo);
+    await this.selecionarProfessor();
+    await this.selecionarDisciplina();
+    await this.salvar();
+  }
+
+  async pesquisarAvaliacao(descricao: string) {
+    await this.searchInput.fill(descricao);
+    // ✅ Aguarda a lista refletir o resultado da busca
+    await this.page
+      .getByRole('heading', { level: 3 })
+      .filter({ hasText: descricao })
+      .first()
+      .waitFor({ state: 'visible', timeout: 10000 });
   }
 
   async isAvaliacaoVisible(descricao: string): Promise<boolean> {
     try {
-      const row = this.page.getByRole('row').filter({ hasText: descricao });
-      await row.waitFor({ state: 'visible', timeout: 5000 });
+      const heading = this.page.getByRole('heading').filter({ hasText: descricao });
+      await heading.waitFor({ state: 'visible', timeout: 5000 });
       return true;
     } catch {
       return false;
@@ -134,9 +145,12 @@ export class AvaliacoesPage {
 
   async getErrorMessage(): Promise<string> {
     try {
+      // O alert fica fora do modal — espera até 8s pois pode aparecer após o modal fechar
       const errorLocator = this.page.locator('[role="alert"]').first();
-      await errorLocator.waitFor({ state: 'visible', timeout: 5000 });
-      return await errorLocator.textContent() || '';
+      await errorLocator.waitFor({ state: 'visible', timeout: 8000 });
+      // Pega só o texto do conteúdo, ignorando o botão "Dismiss"
+      const messageEl = errorLocator.locator('> :not(button)').last();
+      return (await messageEl.textContent()) || (await errorLocator.textContent()) || '';
     } catch {
       return '';
     }

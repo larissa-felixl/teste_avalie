@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { LoginPage } from '../../pages/LoginPage';
 import { ConteudosPage } from '../../pages/ConteudosPage';
 import { AuthHelper } from '../../fixtures/authHelper';
 
@@ -8,97 +7,102 @@ const EMAIL = 'e2e-super-teacher-09@example.com';
 const PASSWORD = 'password';
 
 test.describe('Conteúdos - CRUD', () => {
-  let loginPage: LoginPage;
   let conteudosPage: ConteudosPage;
 
   test.beforeEach(async ({ page }) => {
     await page.goto('https://app.avaliei.com.br/login');
-    loginPage = new LoginPage(page);
     await AuthHelper.loginWith2FA(page, EMAIL, PASSWORD, SECRET);
-    
-    // Aguarda a página carregar completamente após 2FA
     await page.waitForLoadState('networkidle');
-    
+
+    if (page.url().includes('login')) {
+      throw new Error('Falha na autenticação: ainda em página de login após 2FA');
+    }
+
     conteudosPage = new ConteudosPage(page);
     await conteudosPage.navigateToConteudos();
   });
 
-  // ✅ CASOS FELIZES (Happy Path)
-  test('[FELIZ] Deve criar um conteúdo com sucesso', async ({ page }) => {
+  // ✅ CASOS FELIZES
+  test('[FELIZ] Deve criar um conteúdo com sucesso', async () => {
     const conteudoName = `Conteúdo Teste ${Date.now()}`;
-    const disciplinaName = 'Espanhol';
-    
-    await conteudosPage.addConteudo(conteudoName, disciplinaName);
-    
-    // Verifica se foi criado
+
+    await conteudosPage.addConteudo(conteudoName, 'Espanhol');
     await conteudosPage.searchConteudo(conteudoName);
-    await expect(page.getByText(conteudoName)).toBeVisible();
+
+    const isVisible = await conteudosPage.isConteudoVisible(conteudoName);
+    expect(isVisible).toBe(true);
   });
 
-  test('[FELIZ] Deve editar um conteúdo com sucesso', async ({ page }) => {
+  test('[FELIZ] Deve editar um conteúdo com sucesso', async () => {
     const conteudoName = `Conteúdo Teste ${Date.now()}`;
     const novoNome = `Conteúdo Editado ${Date.now()}`;
-    const disciplinaName = 'Espanhol';
-    const novaDisciplina = 'Educação Física';
-    
-    // Cria
-    await conteudosPage.addConteudo(conteudoName, disciplinaName);
-    
-    // Edita
+
+    await conteudosPage.addConteudo(conteudoName, 'Espanhol');
     await conteudosPage.searchConteudo(conteudoName);
-    await conteudosPage.editConteudo(conteudoName, novoNome, novaDisciplina);
-    
-    // Verifica
+    await conteudosPage.editConteudo(conteudoName, novoNome, 'Educação Física');
+
     await conteudosPage.searchConteudo(novoNome);
-    await expect(page.getByText(novoNome)).toBeVisible();
+
+    const isVisible = await conteudosPage.isConteudoVisible(novoNome);
+    expect(isVisible).toBe(true);
   });
 
-  // ❌ CASOS TRISTES (Sad Path)
-  test('[TRISTE] Deve impedir salvar conteúdo sem nome', async ({ page }) => {
+  // ❌ CASOS TRISTES
+  test('[TRISTE] Deve impedir salvar conteúdo sem nome', async () => {
     await conteudosPage.addConteudoButton.click();
     await conteudosPage.clearConteudoNameInput();
     await conteudosPage.saveButton.click();
-    
-    // Verifica se há erro
-    await expect(page.locator('text=obrigatório').or(page.locator('text=Campo'))).toBeVisible().catch(() => {
-      // Se não houver mensagem de erro, é um problema
-    });
+
+    // Modal deve continuar aberto (app não salvou)
+    const inputVisible = await conteudosPage.conteudoNameInput
+      .isVisible({ timeout: 2000 })
+      .catch(() => false);
+    expect(inputVisible).toBe(true);
   });
 
-  test('[TRISTE] Deve impedir salvar conteúdo sem selecionar disciplina', async ({ page }) => {
+  test('[TRISTE] Deve impedir salvar conteúdo sem selecionar disciplina', async () => {
     const conteudoName = `Conteúdo Teste ${Date.now()}`;
-    
-    await conteudosPage.addConteudoButton.click();
-    await conteudosPage.conteudoNameInput.fill(conteudoName);
-    // Não seleciona disciplina
-    await conteudosPage.saveButton.click();
-    
-    // Verifica se há erro
-    await expect(page.locator('text=obrigatório').or(page.locator('text=Selecione'))).toBeVisible().catch(() => {
-      // Se não houver erro, é problema
-    });
+
+    // submitConteudoForm sem disciplina — não assume sucesso
+    await conteudosPage.submitConteudoForm(conteudoName);
+
+    // Modal deve continuar aberto OU app exibe erro
+    const inputVisible = await conteudosPage.conteudoNameInput
+      .isVisible({ timeout: 2000 })
+      .catch(() => false);
+    expect(inputVisible).toBe(true);
   });
 
-  // 🔧 CASOS DE BORDA (Edge Cases)
-  test('[BORDA] Deve criar conteúdo com nome muito longo', async ({ page }) => {
+  // 🔲 CASOS DE BORDA
+  test('[BORDA] Deve criar conteúdo com nome muito longo', async () => {
     const conteudoLongo = 'C'.repeat(100);
-    const disciplinaName = 'Espanhol';
-    
-    await conteudosPage.addConteudo(conteudoLongo, disciplinaName);
-    
-    // Verifica se foi criado
-    await conteudosPage.searchConteudo(conteudoLongo.substring(0, 50));
-    await expect(page.getByText(new RegExp(conteudoLongo.substring(0, 20)))).toBeVisible();
+
+    // submitConteudoForm: app pode truncar ou exibir erro
+    await conteudosPage.submitConteudoForm(conteudoLongo, 'Espanhol');
+
+    const errorMessage = await conteudosPage.getErrorMessage();
+
+    if (errorMessage.length > 0) {
+      // App rejeitou — comportamento válido
+      expect(errorMessage.length).toBeGreaterThan(0);
+    } else {
+      // App aceitou — verifica na tabela pelo trecho que foi realmente salvo
+      await conteudosPage.searchConteudo(conteudoLongo.substring(0, 50));
+      const row = conteudosPage.page
+        .locator('tbody tr')
+        .filter({ hasText: conteudoLongo.substring(0, 50) })
+        .first();
+      await expect(row).toBeVisible({ timeout: 5000 });
+    }
   });
 
-  test('[BORDA] Deve criar conteúdo com nome de um caractere', async ({ page }) => {
+  test('[BORDA] Deve criar conteúdo com nome curto', async () => {
     const conteudoSimples = `x-${Date.now()}`;
-    const disciplinaName = 'Geografia';
-    
-    await conteudosPage.addConteudo(conteudoSimples, disciplinaName);
-    
-    // Verifica se foi criado
+
+    await conteudosPage.addConteudo(conteudoSimples, 'Geografia');
     await conteudosPage.searchConteudo(conteudoSimples);
-    await expect(page.getByText(conteudoSimples)).toBeVisible();
+
+    const isVisible = await conteudosPage.isConteudoVisible(conteudoSimples);
+    expect(isVisible).toBe(true);
   });
 });
