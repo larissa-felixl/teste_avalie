@@ -62,7 +62,7 @@ export class ConteudosPage {
 
     // Aguarda qualquer desfecho: modal fecha OU alert aparece
     await Promise.race([
-      this.conteudoNameInput.waitFor({ state: 'hidden', timeout: 10000 }),
+      this.conteudoNameInput.waitFor({ state: 'hidden', timeout: 10000 }), 
       alertLocator.first().waitFor({ state: 'visible', timeout: 10000 }),
     ]);
   }
@@ -132,7 +132,7 @@ export class ConteudosPage {
       const errorLocator = this.page.locator('[role="alert"]').first();
       await errorLocator.waitFor({ state: 'visible', timeout: 8000 });
       // Pega só o texto do conteúdo, ignorando o botão "Dismiss"
-      const messageEl = errorLocator.locator('> :not(button)').last();
+      const messageEl = errorLocator.locator('> :not(button)').last(); 
       return (await messageEl.textContent()) || (await errorLocator.textContent()) || '';
     } catch {
       return '';

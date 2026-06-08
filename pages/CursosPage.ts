@@ -31,10 +31,8 @@ export class CursosPage {
     await this.addCursoButton.waitFor({ state: 'visible', timeout: 30000 });
   }
 
-  // ✅ Método privado reutilizado em add, submit e edit
   private async selecionarEscolaridade(escolaridade: string) {
     await this.escolaridadeButton.click();
-    // ✅ Digita no campo de busca interno do dropdown antes de selecionar
     const buscaInput = this.page
       .getByRole('textbox', { name: 'Buscar nível...' })
       .or(this.page.getByPlaceholder('Buscar nível...'));

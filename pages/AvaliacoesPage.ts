@@ -15,7 +15,6 @@ export class AvaliacoesPage {
 
   constructor(page: Page) {
     this.page = page;
-    // ✅ Escopo no nav principal para evitar ambiguidade
     this.avaliacoesLink = page
       .getByRole('navigation', { name: 'Main' })
       .getByRole('link', { name: 'Avaliações' });
@@ -27,18 +26,15 @@ export class AvaliacoesPage {
     this.modoSelect = page.getByRole('combobox', { name: 'Modo: campo obrigatório' });
     this.salvarAvaliacaoButton = page.getByRole('button', { name: 'Salvar avaliação' });
     this.salvarAlteracoesButton = page.getByRole('button', { name: 'Salvar Alterações' });
-    // ✅ searchInput adicionado ao construtor
     this.searchInput = page.getByPlaceholder('Pesquisar avaliações...');
   }
 
   async navigateToAvaliacoes() {
     await this.page.goto('https://app.avaliei.com.br/avaliacoes');
     await this.page.waitForURL('**/avaliacoes');
-    // ✅ Aguarda o botão principal em vez de networkidle
     await this.criarAvaliacaoButton.waitFor({ state: 'visible', timeout: 30000 });
   }
 
-  // ✅ PASSOS REUTILIZÁVEIS — cada ação isolada
   async abrirFormulario() {
     await this.criarAvaliacaoButton.click();
     await this.descricaoInput.waitFor({ state: 'visible', timeout: 10000 });
@@ -100,11 +96,9 @@ export class AvaliacoesPage {
 
   async salvar() {
     await this.salvarAvaliacaoButton.click();
-    // ✅ Aguarda o formulário fechar como confirmação de sucesso
     await this.descricaoInput.waitFor({ state: 'hidden', timeout: 15000 });
   }
 
-  // ✅ MÉTODO COMPOSTO — usa os passos reutilizáveis
   async criarAvaliacao(
     descricao: string,
     turma: string,
@@ -125,7 +119,6 @@ export class AvaliacoesPage {
 
   async pesquisarAvaliacao(descricao: string) {
     await this.searchInput.fill(descricao);
-    // ✅ Aguarda a lista refletir o resultado da busca
     await this.page
       .getByRole('heading', { level: 3 })
       .filter({ hasText: descricao })
@@ -145,10 +138,8 @@ export class AvaliacoesPage {
 
   async getErrorMessage(): Promise<string> {
     try {
-      // O alert fica fora do modal — espera até 8s pois pode aparecer após o modal fechar
       const errorLocator = this.page.locator('[role="alert"]').first();
       await errorLocator.waitFor({ state: 'visible', timeout: 8000 });
-      // Pega só o texto do conteúdo, ignorando o botão "Dismiss"
       const messageEl = errorLocator.locator('> :not(button)').last();
       return (await messageEl.textContent()) || (await errorLocator.textContent()) || '';
     } catch {
