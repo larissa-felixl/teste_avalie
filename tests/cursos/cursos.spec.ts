@@ -22,7 +22,6 @@ test.describe('Cursos - CRUD', () => {
     await cursosPage.navigateToCursos();
   });
 
-  //  CASOS FELIZES
   test('[FELIZ] Deve criar um curso com sucesso e procurar na listagem', async () => {
     const nomeCurso = `Curso Teste ${Date.now()}`;
 
@@ -49,7 +48,6 @@ test.describe('Cursos - CRUD', () => {
     await cursosPage.deleteCurso(novoNome);
   });
 
-  //  CASOS TRISTES
   test('[TRISTE] Deve exibir erro ao cadastrar apenas o nome do curso (sem escolaridade)', async () => {
     const nomeCurso = `Curso Sem Escolaridade ${Date.now()}`;
 
@@ -68,7 +66,6 @@ test.describe('Cursos - CRUD', () => {
     expect(errorMessage).toContain('Este campo é obrigatório');
   });
 
-  //  CASOS DE BORDA
   test('[BORDA] Deve exibir erro ao tentar criar um curso com caracteres especiais', async () => {
     const nomeCurso = `Curso!@#$%^&*() ${Date.now()}`;
 

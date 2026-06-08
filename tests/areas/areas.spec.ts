@@ -22,7 +22,6 @@ test.describe('Áreas - CRUD', () => {
     await areasPage.navigateToAreas();
   });
 
-  //  CASOS FELIZES
   test('[FELIZ] Deve criar uma área com sucesso', async () => {
     const areaName = `Área Teste ${Date.now()}`;
 
@@ -47,13 +46,11 @@ test.describe('Áreas - CRUD', () => {
     expect(isVisible).toBe(true);
   });
 
-  //  CASOS TRISTES
   test('[TRISTE] Deve impedir salvar área com campo vazio', async () => {
     await areasPage.addAreaButton.click();
     await areasPage.clearAreaNameInput();
     await areasPage.saveButton.click();
 
-    // Modal deve continuar aberto (app não salvou)
     const inputVisible = await areasPage.areaNameInput
       .isVisible({ timeout: 2000 })
       .catch(() => false);
@@ -72,7 +69,6 @@ test.describe('Áreas - CRUD', () => {
     expect(errorMessage).toContain('Já existe uma área com o nome');
   });
 
-  //  CASOS DE BORDA
   test('[BORDA] Deve criar área com nome muito longo', async () => {
     const areaLonga = 'A'.repeat(100);
 

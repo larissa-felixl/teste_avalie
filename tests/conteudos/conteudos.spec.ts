@@ -22,7 +22,6 @@ test.describe('Conteúdos - CRUD', () => {
     await conteudosPage.navigateToConteudos();
   });
 
-  //  CASOS FELIZES
   test('[FELIZ] Deve criar um conteúdo com sucesso', async () => {
     const conteudoName = `Conteúdo Teste ${Date.now()}`;
 
@@ -47,7 +46,6 @@ test.describe('Conteúdos - CRUD', () => {
     expect(isVisible).toBe(true);
   });
 
-  //  CASOS TRISTES
   test('[TRISTE] Deve impedir salvar conteúdo sem nome', async () => {
     await conteudosPage.addConteudoButton.click();
     await conteudosPage.clearConteudoNameInput();
@@ -70,7 +68,6 @@ test.describe('Conteúdos - CRUD', () => {
     expect(inputVisible).toBe(true);
   });
 
-  //  CASOS DE BORDA
   test('[BORDA] Deve criar conteúdo com nome muito longo', async () => {
     const conteudoLongo = 'C'.repeat(100);
 

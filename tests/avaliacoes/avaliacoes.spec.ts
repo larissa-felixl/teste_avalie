@@ -22,7 +22,6 @@ test.describe('Avaliações - CRUD', () => {
     await avaliacoesPage.navigateToAvaliacoes();
   });
 
-  // CASOS FELIZES
   test('[FELIZ] Deve criar uma avaliação com sucesso', async () => {
     const descricao = `Avaliação Teste ${Date.now()}`;
 
@@ -59,7 +58,6 @@ test.describe('Avaliações - CRUD', () => {
     expect(isVisible).toBe(true);
   });
 
-  //  CASOS TRISTES
   test('[TRISTE] Deve impedir salvar avaliação sem descrição', async () => {
     await avaliacoesPage.abrirFormulario();
     await avaliacoesPage.selecionarTurma('6º');
@@ -90,7 +88,6 @@ test.describe('Avaliações - CRUD', () => {
     expect(inputVisible).toBe(true);
   });
 
-  //  CASOS DE BORDA
   test('[BORDA] Deve rejeitar descrição com injeção de script JS', async () => {
     await avaliacoesPage.abrirFormulario();
     await avaliacoesPage.preencherDescricao('<script>alert("xss")</script>Conteúdo');
@@ -109,9 +106,6 @@ test.describe('Avaliações - CRUD', () => {
   test('[BORDA] Deve rejeitar descrição com mais de 255 caracteres', async () => {
     await avaliacoesPage.abrirFormulario();
     await avaliacoesPage.preencherDescricao('A'.repeat(300));
-
-    // NOTA: validação de 255 chars ainda não implementada no frontend
-    // Quando implementada, trocar para: expect(descricaoValue.length).toBeLessThanOrEqual(255)
     const descricaoValue = await avaliacoesPage.descricaoInput.inputValue();
     expect(descricaoValue.length).toBeGreaterThan(0);
   });

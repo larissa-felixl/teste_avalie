@@ -22,7 +22,6 @@ test.describe('Disciplinas - CRUD', () => {
     await disciplinasPage.navigateToDisciplinas();
   });
 
-  // CASOS FELIZES
   test('[FELIZ] Deve criar uma disciplina com sucesso', async () => {
     const disciplinaName = `Disciplina Teste ${Date.now()}`;
     const areaName = 'Matemática e suas tecnologias';
@@ -49,7 +48,6 @@ test.describe('Disciplinas - CRUD', () => {
     expect(isVisible).toBe(true);
   });
 
-  //  CASOS TRISTES
   test('[TRISTE] Deve impedir salvar disciplina sem nome', async () => {
     await disciplinasPage.addDisciplinaButton.click();
     await disciplinasPage.clearDisciplinaNameInput();
@@ -88,7 +86,6 @@ test.describe('Disciplinas - CRUD', () => {
     expect(errorMessage).toContain('Já existe uma disciplina com o nome');
   });
 
-  //  CASOS DE BORDA
   test('[BORDA] Deve criar disciplina com nome muito longo', async () => {
     const disciplinaLonga = 'D'.repeat(100);
     const areaName = 'Matemática e suas tecnologias';
