@@ -22,7 +22,7 @@ test.describe('Conteúdos - CRUD', () => {
     await conteudosPage.navigateToConteudos();
   });
 
-  // ✅ CASOS FELIZES
+  //  CASOS FELIZES
   test('[FELIZ] Deve criar um conteúdo com sucesso', async () => {
     const conteudoName = `Conteúdo Teste ${Date.now()}`;
 
@@ -47,13 +47,12 @@ test.describe('Conteúdos - CRUD', () => {
     expect(isVisible).toBe(true);
   });
 
-  // ❌ CASOS TRISTES
+  //  CASOS TRISTES
   test('[TRISTE] Deve impedir salvar conteúdo sem nome', async () => {
     await conteudosPage.addConteudoButton.click();
     await conteudosPage.clearConteudoNameInput();
     await conteudosPage.saveButton.click();
 
-    // Modal deve continuar aberto (app não salvou)
     const inputVisible = await conteudosPage.conteudoNameInput
       .isVisible({ timeout: 2000 })
       .catch(() => false);
@@ -63,30 +62,25 @@ test.describe('Conteúdos - CRUD', () => {
   test('[TRISTE] Deve impedir salvar conteúdo sem selecionar disciplina', async () => {
     const conteudoName = `Conteúdo Teste ${Date.now()}`;
 
-    // submitConteudoForm sem disciplina — não assume sucesso
     await conteudosPage.submitConteudoForm(conteudoName);
 
-    // Modal deve continuar aberto OU app exibe erro
     const inputVisible = await conteudosPage.conteudoNameInput
       .isVisible({ timeout: 2000 })
       .catch(() => false);
     expect(inputVisible).toBe(true);
   });
 
-  // 🔲 CASOS DE BORDA
+  //  CASOS DE BORDA
   test('[BORDA] Deve criar conteúdo com nome muito longo', async () => {
     const conteudoLongo = 'C'.repeat(100);
 
-    // submitConteudoForm: app pode truncar ou exibir erro
     await conteudosPage.submitConteudoForm(conteudoLongo, 'Espanhol');
 
     const errorMessage = await conteudosPage.getErrorMessage();
 
     if (errorMessage.length > 0) {
-      // App rejeitou — comportamento válido
       expect(errorMessage.length).toBeGreaterThan(0);
     } else {
-      // App aceitou — verifica na tabela pelo trecho que foi realmente salvo
       await conteudosPage.searchConteudo(conteudoLongo.substring(0, 50));
       const row = conteudosPage.page
         .locator('tbody tr')

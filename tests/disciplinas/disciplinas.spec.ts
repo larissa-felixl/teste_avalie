@@ -22,7 +22,7 @@ test.describe('Disciplinas - CRUD', () => {
     await disciplinasPage.navigateToDisciplinas();
   });
 
-  // ✅ CASOS FELIZES
+  // CASOS FELIZES
   test('[FELIZ] Deve criar uma disciplina com sucesso', async () => {
     const disciplinaName = `Disciplina Teste ${Date.now()}`;
     const areaName = 'Matemática e suas tecnologias';
@@ -49,13 +49,12 @@ test.describe('Disciplinas - CRUD', () => {
     expect(isVisible).toBe(true);
   });
 
-  // ❌ CASOS TRISTES
+  //  CASOS TRISTES
   test('[TRISTE] Deve impedir salvar disciplina sem nome', async () => {
     await disciplinasPage.addDisciplinaButton.click();
     await disciplinasPage.clearDisciplinaNameInput();
     await disciplinasPage.saveButton.click();
 
-    // Modal deve continuar aberto (app não salvou)
     const inputVisible = await disciplinasPage.disciplinaNameInput
       .isVisible({ timeout: 2000 })
       .catch(() => false);
@@ -68,10 +67,8 @@ test.describe('Disciplinas - CRUD', () => {
     await disciplinasPage.addDisciplinaButton.click();
     await disciplinasPage.disciplinaNameInput.waitFor({ state: 'visible', timeout: 10000 });
     await disciplinasPage.disciplinaNameInput.fill(disciplinaName);
-    // Não seleciona a área
     await disciplinasPage.saveButton.click();
 
-    // Modal deve continuar aberto (app não salvou)
     const inputVisible = await disciplinasPage.disciplinaNameInput
       .isVisible({ timeout: 2000 })
       .catch(() => false);
@@ -85,31 +82,24 @@ test.describe('Disciplinas - CRUD', () => {
     await disciplinasPage.addDisciplina(disciplinaName, areaName);
     await disciplinasPage.navigateToDisciplinas();
 
-    // ✅ submitDisciplinaForm: aguarda modal fechar OU alert aparecer — não assume sucesso
     await disciplinasPage.submitDisciplinaForm(disciplinaName, areaName);
 
-    // ✅ App fecha o modal mas exibe alert de duplicata na lista — verificamos o texto real
     const errorMessage = await disciplinasPage.getErrorMessage();
     expect(errorMessage).toContain('Já existe uma disciplina com o nome');
   });
 
-  // 🔲 CASOS DE BORDA
+  //  CASOS DE BORDA
   test('[BORDA] Deve criar disciplina com nome muito longo', async () => {
     const disciplinaLonga = 'D'.repeat(100);
     const areaName = 'Matemática e suas tecnologias';
 
-    // ✅ submitDisciplinaForm: app pode truncar e exibir erro se já existir
     await disciplinasPage.submitDisciplinaForm(disciplinaLonga, areaName);
 
-    // ✅ Verifica o desfecho real: disciplina criada OU erro exibido
     const errorMessage = await disciplinasPage.getErrorMessage();
 
     if (errorMessage.length > 0) {
-      // App rejeitou (duplicata ou limite de chars) — comportamento válido
       expect(errorMessage.length).toBeGreaterThan(0);
     } else {
-      // App aceitou — verifica na tabela usando o texto que foi realmente salvo
-      // A busca usa substring pois a app pode ter truncado o nome
       await disciplinasPage.searchDisciplina(disciplinaLonga.substring(0, 50));
       const disciplinaRow = disciplinasPage.page
         .locator('tbody tr')
@@ -130,9 +120,7 @@ test.describe('Disciplinas - CRUD', () => {
     await disciplinasPage.page.getByLabel('Suggestions').getByText(areaName).click();
     await disciplinasPage.saveButton.click();
 
-    // ✅ Aguarda o alert aparecer (pode ser após o modal fechar)
     const errorMessage = await disciplinasPage.getErrorMessage();
-    // Texto real da app: "Conteúdo inválido detectado na requisição."
     expect(errorMessage).toContain('Conteúdo inválido detectado');
   });
 });

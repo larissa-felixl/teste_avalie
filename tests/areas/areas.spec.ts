@@ -22,7 +22,7 @@ test.describe('Áreas - CRUD', () => {
     await areasPage.navigateToAreas();
   });
 
-  // ✅ CASOS FELIZES
+  //  CASOS FELIZES
   test('[FELIZ] Deve criar uma área com sucesso', async () => {
     const areaName = `Área Teste ${Date.now()}`;
 
@@ -47,7 +47,7 @@ test.describe('Áreas - CRUD', () => {
     expect(isVisible).toBe(true);
   });
 
-  // ❌ CASOS TRISTES
+  //  CASOS TRISTES
   test('[TRISTE] Deve impedir salvar área com campo vazio', async () => {
     await areasPage.addAreaButton.click();
     await areasPage.clearAreaNameInput();
@@ -66,30 +66,23 @@ test.describe('Áreas - CRUD', () => {
     await areasPage.addArea(areaName);
     await areasPage.navigateToAreas();
 
-    // ✅ submitAreaForm: aguarda modal fechar OU alert aparecer — não assume sucesso
     await areasPage.submitAreaForm(areaName);
 
-    // ✅ App fecha o modal mas exibe alert de duplicata na lista — verificamos o texto real
     const errorMessage = await areasPage.getErrorMessage();
     expect(errorMessage).toContain('Já existe uma área com o nome');
   });
 
-  // 🔲 CASOS DE BORDA
+  //  CASOS DE BORDA
   test('[BORDA] Deve criar área com nome muito longo', async () => {
     const areaLonga = 'A'.repeat(100);
 
-    // ✅ submitAreaForm: app pode truncar e exibir erro de duplicata se já existir
     await areasPage.submitAreaForm(areaLonga);
 
-    // ✅ Verifica o desfecho real: área criada OU erro exibido
     const errorMessage = await areasPage.getErrorMessage();
 
     if (errorMessage.length > 0) {
-      // App rejeitou (duplicata ou limite de chars) — comportamento válido
       expect(errorMessage.length).toBeGreaterThan(0);
     } else {
-      // App aceitou — verifica na tabela usando o texto que foi realmente salvo
-      // A busca usa substring pois a app pode ter truncado o nome
       await areasPage.searchArea(areaLonga.substring(0, 50));
       const areaRow = await areasPage.page
         .locator('tbody tr')
@@ -107,9 +100,7 @@ test.describe('Áreas - CRUD', () => {
     await areasPage.areaNameInput.fill(areaInvalida);
     await areasPage.saveButton.click();
 
-    // ✅ Aguarda o alert aparecer (pode ser após o modal fechar)
     const errorMessage = await areasPage.getErrorMessage();
-    // Texto real da app: "Conteúdo inválido detectado na requisição."
     expect(errorMessage).toContain('Conteúdo inválido detectado');
   });
 });

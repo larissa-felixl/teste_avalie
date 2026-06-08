@@ -19,11 +19,10 @@ test.describe('Cursos - CRUD', () => {
     }
 
     cursosPage = new CursosPage(page);
-    // ✅ navigateToCursos já lida com o submenu — sem loop de retry manual
     await cursosPage.navigateToCursos();
   });
 
-  // ✅ CASOS FELIZES
+  //  CASOS FELIZES
   test('[FELIZ] Deve criar um curso com sucesso e procurar na listagem', async () => {
     const nomeCurso = `Curso Teste ${Date.now()}`;
 
@@ -33,7 +32,6 @@ test.describe('Cursos - CRUD', () => {
     const isVisible = await cursosPage.isCursoVisible(nomeCurso);
     expect(isVisible).toBe(true);
 
-    // Limpa o dado criado pelo teste
     await cursosPage.deleteCurso(nomeCurso);
   });
 
@@ -48,18 +46,15 @@ test.describe('Cursos - CRUD', () => {
     const isVisible = await cursosPage.isCursoVisible(novoNome);
     expect(isVisible).toBe(true);
 
-    // Limpa o dado criado pelo teste
     await cursosPage.deleteCurso(novoNome);
   });
 
-  // ❌ CASOS TRISTES
+  //  CASOS TRISTES
   test('[TRISTE] Deve exibir erro ao cadastrar apenas o nome do curso (sem escolaridade)', async () => {
     const nomeCurso = `Curso Sem Escolaridade ${Date.now()}`;
 
-    // ✅ submitCursoForm sem escolaridade — não assume sucesso
     await cursosPage.submitCursoForm(nomeCurso);
 
-    // Modal deve continuar aberto (app não salvou)
     const inputVisible = await cursosPage.nomeInput
       .isVisible({ timeout: 2000 })
       .catch(() => false);
@@ -67,15 +62,13 @@ test.describe('Cursos - CRUD', () => {
   });
 
   test('[TRISTE] Deve exibir erro ao cadastrar apenas o nível de escolaridade (sem nome)', async () => {
-    // ✅ submitCursoForm sem nome — não assume sucesso
     await cursosPage.submitCursoForm(undefined, 'Técnico');
 
-    // ✅ Verifica mensagem de erro inline de campo obrigatório
     const errorMessage = await cursosPage.getInlineError();
     expect(errorMessage).toContain('Este campo é obrigatório');
   });
 
-  // 🔲 CASOS DE BORDA
+  //  CASOS DE BORDA
   test('[BORDA] Deve exibir erro ao tentar criar um curso com caracteres especiais', async () => {
     const nomeCurso = `Curso!@#$%^&*() ${Date.now()}`;
 

@@ -22,7 +22,7 @@ test.describe('Avaliações - CRUD', () => {
     await avaliacoesPage.navigateToAvaliacoes();
   });
 
-  // ✅ CASOS FELIZES
+  // CASOS FELIZES
   test('[FELIZ] Deve criar uma avaliação com sucesso', async () => {
     const descricao = `Avaliação Teste ${Date.now()}`;
 
@@ -53,14 +53,13 @@ test.describe('Avaliações - CRUD', () => {
 
     await avaliacoesPage.navigateToAvaliacoes();
 
-    // ✅ Pesquisa pelo nome exato e aguarda resultado filtrado
     await avaliacoesPage.pesquisarAvaliacao(descricao);
 
     const isVisible = await avaliacoesPage.isAvaliacaoVisible(descricao);
     expect(isVisible).toBe(true);
   });
 
-  // ❌ CASOS TRISTES
+  //  CASOS TRISTES
   test('[TRISTE] Deve impedir salvar avaliação sem descrição', async () => {
     await avaliacoesPage.abrirFormulario();
     await avaliacoesPage.selecionarTurma('6º');
@@ -69,7 +68,6 @@ test.describe('Avaliações - CRUD', () => {
     await avaliacoesPage.selecionarModo('Convencional');
     await avaliacoesPage.salvarAvaliacaoButton.click();
 
-    // Formulário deve continuar aberto (app não salvou)
     const inputVisible = await avaliacoesPage.descricaoInput
       .isVisible({ timeout: 2000 })
       .catch(() => false);
@@ -86,14 +84,13 @@ test.describe('Avaliações - CRUD', () => {
     await avaliacoesPage.selecionarModo('Convencional');
     await avaliacoesPage.salvarAvaliacaoButton.click();
 
-    // Formulário deve continuar aberto (app não salvou)
     const inputVisible = await avaliacoesPage.descricaoInput
       .isVisible({ timeout: 2000 })
       .catch(() => false);
     expect(inputVisible).toBe(true);
   });
 
-  // 🔲 CASOS DE BORDA
+  //  CASOS DE BORDA
   test('[BORDA] Deve rejeitar descrição com injeção de script JS', async () => {
     await avaliacoesPage.abrirFormulario();
     await avaliacoesPage.preencherDescricao('<script>alert("xss")</script>Conteúdo');
@@ -105,7 +102,6 @@ test.describe('Avaliações - CRUD', () => {
     await avaliacoesPage.selecionarDisciplina();
     await avaliacoesPage.salvarAvaliacaoButton.click();
 
-    // ✅ Aguarda o alert aparecer (pode ser após o modal fechar)
     const errorMessage = await avaliacoesPage.getErrorMessage();
     expect(errorMessage).toContain('Conteúdo inválido detectado');
   });
