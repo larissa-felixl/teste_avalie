@@ -11,7 +11,6 @@ export class ConteudosPage {
 
   constructor(page: Page) {
     this.page = page;
-    // ✅ Escopo no nav principal para evitar ambiguidade
     this.conteudosLink = page
       .getByRole('navigation', { name: 'Main' })
       .getByRole('link', { name: 'Conteúdos' });
@@ -39,12 +38,10 @@ export class ConteudosPage {
     await disciplinaOption.click();
 
     await this.saveButton.click();
-    // Espera o modal fechar como confirmação de sucesso
     await this.conteudoNameInput.waitFor({ state: 'hidden', timeout: 10000 });
   }
 
-  // Submete o formulário SEM esperar sucesso — usado em testes de erro,
-  // onde o modal pode fechar mas um alert aparece logo após
+
   async submitConteudoForm(conteudoName: string, disciplinaName?: string) {
     await this.addConteudoButton.click();
     await this.conteudoNameInput.waitFor({ state: 'visible', timeout: 10000 });
@@ -60,7 +57,6 @@ export class ConteudosPage {
     await this.saveButton.click();
     const alertLocator = this.page.locator('[role="alert"]:not(#__next-route-announcer__)');
 
-    // Aguarda qualquer desfecho: modal fecha OU alert aparece
     await Promise.race([
       this.conteudoNameInput.waitFor({ state: 'hidden', timeout: 10000 }), 
       alertLocator.first().waitFor({ state: 'visible', timeout: 10000 }),
@@ -70,7 +66,6 @@ export class ConteudosPage {
   async searchConteudo(conteudoName: string) {
     await this.searchInput.click();
     await this.searchInput.fill(conteudoName);
-    // Espera a tabela refletir o resultado da busca
     await this.page
       .locator('tbody tr')
       .filter({ hasText: conteudoName })
@@ -79,7 +74,6 @@ export class ConteudosPage {
   }
 
   async editConteudo(conteudoName: string, newName: string, newDisciplina: string) {
-    // Escopa o botão Editar dentro da linha correta
     const conteudoRow = this.page.locator('tbody tr').filter({ hasText: conteudoName });
     await conteudoRow.waitFor({ state: 'visible', timeout: 10000 });
     await conteudoRow.getByRole('button', { name: 'Editar' }).click();
@@ -94,7 +88,6 @@ export class ConteudosPage {
     await disciplinaOption.click();
 
     await this.saveButton.click();
-    // Espera o modal fechar em vez de timeout cego
     await this.conteudoNameInput.waitFor({ state: 'hidden', timeout: 10000 });
   }
 
@@ -103,11 +96,9 @@ export class ConteudosPage {
     await conteudoRow.waitFor({ state: 'visible', timeout: 10000 });
     await conteudoRow.getByRole('button', { name: 'Excluir' }).click();
 
-    // Confirma o dialog de exclusão
     const confirmButton = this.page.getByRole('button', { name: 'Excluir' }).last();
     await confirmButton.waitFor({ state: 'visible', timeout: 5000 });
     await confirmButton.click();
-    // Espera a linha desaparecer como confirmação
     await conteudoRow.waitFor({ state: 'hidden', timeout: 10000 });
   }
 
@@ -128,10 +119,8 @@ export class ConteudosPage {
 
   async getErrorMessage(): Promise<string> {
     try {
-      // O alert fica fora do modal — espera até 8s pois pode aparecer após o modal fechar
       const errorLocator = this.page.locator('[role="alert"]').first();
       await errorLocator.waitFor({ state: 'visible', timeout: 8000 });
-      // Pega só o texto do conteúdo, ignorando o botão "Dismiss"
       const messageEl = errorLocator.locator('> :not(button)').last(); 
       return (await messageEl.textContent()) || (await errorLocator.textContent()) || '';
     } catch {
